@@ -36,8 +36,10 @@ for(i=1;i<=n;i++)
                                                 frame[j]=a[i];
                                                 j=(j+1)%no;
                                                 count++;
-                                                for(k=0;k<no;k++)
-                                                printf("%d\t\t\t",frame[k]);
+                                                for(k=0;k<no;k++){
+                                                printf("%d\t\t\t\t",frame[k]);
+                                                }
+                                                printf("%d", count);
 }
 
 
