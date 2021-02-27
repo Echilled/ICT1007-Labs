@@ -1,36 +1,48 @@
 #include <stdio.h>
 
-int main(void) {
-  int i,j,k,f,pf =0, count=0,n;
-  int rs[25], m[10];
+int main()
+{
+int i,j,n,a[50],frame[10],no,k,avail,count=0, page_fault = 0;
+            printf("\n ENTER THE NUMBER OF PAGES (legnth of the ref string):\n");
+scanf("%d",&n);
+            printf("\n ENTER THE PAGE NUMBERS:\n");
+            for(i=1;i<=n;i++)
+            scanf("%d",&a[i]);
+            printf("\n ENTER THE NUMBER OF FRAMES :");
+            scanf("%d",&no);
+            printf("The Page replacement process is\n");
+for(i=0;i<no;i++)
+            frame[i]= -1;
+                        j=0;
+                        printf("Referece string\t\t");
+                for(int m = 0; m < no; m++){
+                  
+                        printf("page frame_%d\t",m+1);
+                  
+                        }
+                        printf("Page fault number");
+for(i=1;i<=n;i++)
+                        { 
+                                    printf("\n\t\t\t%d\t\t\t\t",a[i]);
+                                    avail=0;
+                                    for(k=0;k<no;k++)
+                      if(frame[k]==a[i]){ 
+                                  avail=1;
+                      
+                                        }
+                                           
+                                    if (avail==0)
+                                    {
+                                                frame[j]=a[i];
+                                                j=(j+1)%no;
+                                                count++;
+                                                for(k=0;k<no;k++)
+                                                printf("%d\t\t\t",frame[k]);
+}
 
 
-  printf("\n Page Replacement Method: FIFO");
-  printf("\n Enter the number of pages (length of the reference string): ");
-
-
-  scanf("%d", &n);
-  printf("\n Enter the page numbers (reference string):");
-
-  for(i = 0;i < n; i++){
-    scanf("%d", &rs[i]);
-  
-  printf("\n Enter the number of frames");
-
-  scanf("%d", &f);
-
-  for(i = 0; i < f; i++){
-    m[i] = -1;
-
-printf("\n The Page Replacement Process is\n");
-printf("\t REF STRING");
-
-  }
-printf("\nThenumberofPageFaultsusingFIFO:%d\n",pf);
-
-  }
-
-
-
-
+                                    printf("\n");
+}
+    printf("Page Fault Is %d",count);
+                        return 0;
 }
