@@ -1,96 +1,87 @@
-#include <stdio.h>
-
-
-void print(int frameno,int frame[])
-{
-            int j;
-            for(j=0;j<frameno;j++)
-            printf("%d\t",frame[j]);
-            printf("\n");
-}         
-
+#include<stdio.h>
+#include<stdlib.h>
 
 int main()
 {
-int rs[50],i,j,k,m,f,min,pf=0, avail=0, location=0, repindex;
-int a[20]; int cntr[20] = {0};
-                        
-printf("\n Page replacement Method:Least Frequently Used (LFU)");
-printf("\nEnter the number of pages(length of the reference string):");
-scanf("%d", &m);          
+    int rs[20]; // = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1};
+    int i, j, k, m, f, next, pf = 0;
+    int resource, min_arr_index = 0, arr_index[3], min_count = 0;
+    int cntr[3], a[3];
 
-printf("\n Enter the page numbers (reference string): ");
+    system("clear");
 
-for(i = 0; i < m; i++){
-  scanf("%d", &rs[i]);
-}
+    printf("\n Page Replacement Method: Least Frequently Used (LFU)"); 
+    printf("\n Enter the number of pages (length of the reference string): "); 
+    scanf("%d", &m);
+    //m = 20;
 
+    printf("\n Enter the page numbers (reference string): "); 
+    // 7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1    
+    for (i = 0; i < m; i++)
+        scanf("%d", &rs[i]);
 
-printf("\nEnter the number of frames");
-scanf("%d", &f);
+    printf("\nEnter the number of frames: "); 
+    scanf("%d", &f);    //3
+    //f = 3;
 
-
-
-for(i = 0; i < f; i ++){
-  cntr[i] = 0;
-  a[i] = -1;
-
-}
-
-printf("\n The page replacement Process is \n");
-printf("REF STRING");
-
-for(j =0; j<f; j++){
-  printf("\tPAGE_FRAME_%d", j+1);
-}
-  printf("\t PAGE_FAULT_NUMBER\n");
- 
-
-
-for(i = 0; i < m; i++){
-  printf("%d\t\t",rs[i]);
-  avail = 0;
-  
-  for(j = 0; j < f; j++){
-    if(rs[i] == a[j]){
-      avail = 1; //hit
-      cntr[j]++;
-      break;
+    for (i = 0; i < f; i++){
+        cntr[i] = -1;
+        a[i] = -1;
+        arr_index[i] = -1;
     }
-  
-  }
-  if(avail == 0 && pf <f){ 
-      a[location] = rs[i];
-      cntr[location] =1;
-      location=(location + 1)%f;
-      pf++;
-      print(f,a);
-      }
 
-  else if(avail ==0 ){
-      repindex = 0;
-      min = cntr[0];
-       for(j=1; j<f; j++){
-          if(cntr[j]<min){
-                repindex=j;
-              min=cntr[j];
-          }
+    printf("\n The Page Replacement Process is\n");
+    printf("\tREF STRING");
+    for (j = 0; j < f; j++)
+        printf("\tPAGE_FRAME%d", j + 1);
+    printf("\tPAGE_FAULT_NUMBER\n");
+
+    for (i = 0; i < m; i++){
+        resource = rs[i];
+        for (j = 0; j < f; j++) {
+            if (rs[i] == a[j]) {              
+                //arr_index[j] = i;
+                cntr[j]++;
+                break;
+            }
         }
-        a[repindex]=rs[i];
-        cntr[repindex]=1;
-        pf++;
-        print(f,a);                      
-  }
-  
- 
+        if (j == f){     
+            next = 0;
+            // Find frame with lowest count
+            min_count = 9999;
+            for (k = 0; k < f; k++) {
+                if (cntr[k] < min_count) {
+                    min_count = cntr[k];
+                }
+            }
+            // Find frame that has an earliest arrival index and has lowest count
+            min_arr_index = 9999;
+            for (k = 0; k < f; k++) {
+                if ((cntr[k] == min_count) && (arr_index[k] < min_arr_index)) {
+                    min_arr_index = arr_index[k];
+                    }
+            }
 
+            // Find frame that has an earliest arrival index and alos lowest count to replace
+            for (k = 0; k < f; k++) {
+                if ((cntr[k] == min_count) && (arr_index[k] == min_arr_index)) {
+                    next = k;
+                    break;
+                }
+            }
+            arr_index[next] = i;
+            a[next] = rs[i];
+            cntr[next] = 1;
+            pf++;
+        }
 
-}
+        printf("\t%d", rs[i]);
+        for (j = 0; j < f; j++)
+            printf("\t\t%d", a[j]);
+        if (j == f)
+            printf("\t\t%d", pf);
 
-printf("\n\n Total number of page faults using :LFU %d\n", pf);
-
-            
-return 0;
-
-
+        printf("\n");
+    }
+    printf("\n\n Total number of page faults: %d\n", pf);
 }
