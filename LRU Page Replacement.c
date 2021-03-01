@@ -29,7 +29,7 @@ int main()
     	scanf("%d", &pages[i]);
     }
 
-
+  printf("REFSTRING");
   for(j=0;j<no_of_frames;j++){
   printf("\tPAGE_FRAME_%d",j+1);
   }
@@ -40,6 +40,7 @@ int main()
     }
     
     for(i = 0; i < no_of_pages; ++i){
+      
     	flag1 = flag2 = 0;
     	
     	for(j = 0; j < no_of_frames; ++j){
@@ -73,9 +74,9 @@ int main()
     	}
     	
     	printf("\n");
-    	
+    	printf("%d",pages[i]);
     	for(j = 0; j < no_of_frames; ++j){
-    		printf("\t\t\t%d\t", frames[j]);
+    		printf("\t\t\t\t%d\t", frames[j]);
     	}
       printf("\t\t%d",faults);
 	}
