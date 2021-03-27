@@ -113,14 +113,26 @@ int main() {
     }
     printf("\nDecrypted content: %s\n", strDecrypted);  
     printf("Opening decrypted bin mode file %s to write decrypted content\n", "Lab5_DecryptedBin.txt");
-    fpBinDecrypt = fopen("Lab5_DecryptedBin.txt", "rb");
+    fpBinDecrypt = fopen("Lab5_DecryptedBin.txt", "wb");
     if(fpBinDecrypt == NULL) {         
       printf("Error in creating file %s\n", "Lab5_DecryptedBin.txt");         
       fclose(fpBinDecrypt);
       exit(5);         
     }
     printf("Write different data types into bin mode data file, %s\n", "Lab5_BinData.bin");
+    fpBin = fopen("Lab5_BinData.bin", "wb");
+    if(fpBin == NULL) {         
+      printf("Error in creating file %s\n", "Lab5_DecryptedBin.bin");         
+      fclose(fpBin);
+      exit(5);         
+    }
+
     //add ascii data: "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
+    for(i = 0; i < strlen(strDecrypted); i++){
+      strDecrypted[i] = (int)strDecrypted[i];
+    }
+
+
     ret = fputs(strDecrypted, fpBin);
 
    //add float data
@@ -134,7 +146,30 @@ int main() {
     }
     printf("Closing bin mode data file, %s\n", "Lab5_BinData.bin");
     fclose(fpBin); 
-
-
-
+    printf("\nOpening bin mode data file, %s\n", "Lab5_BinData.bin"); 
+    fpBinData = fopen("Lab5_BinData.bin", "rb"); // binary mode
+    if(fpBinData == NULL) {         
+      printf("Error in creating file, %s\n", "Lab5_BinData.bin");         
+      fclose(fpBinData);         
+      exit(6);     
+    }
+    printf("\nRead string from bin mode file, %s: ", "Lab5_BinData.bin"); 
+    if (fgets(strBin, 44, fpBinData) != NULL) {       
+       printf("<%s>", strBin);   
+    }
+    printf("\n"); // newline
+    printf("\nRead float from bin mode file, %s: ", "Lab5_BinData.bin");
+    fread(&fpBinData, 1, sizeof(floatBin), fpBinData);
+    printf("<%f>", floatBin);  
+    printf("\n"); // newline
+    printf("\nRead binary data from bin mode file, %s: ", "Lab5_BinData.bin");
+    if (fread(dataBin, sizeof(dataBin), 1, fpBinData) < 300 ) { 
+      for (i=0; i < 256; i++) { 
+        if((I % 16) == 0)                 
+          printf("\n"); // newline
+        printf("[%02X]", dataBin[i]);             
+      }
+    }
+    printf("\nClosing bin mode data file, %s\n\n", "Lab5_BinData.bin"); 
+    fclose(fpBinData);
 }
