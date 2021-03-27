@@ -87,4 +87,54 @@ int main() {
     }
     printf("Closing encrypted text mode file %s\n", "Lab5_EncryptedText.txt");  
     fclose(fpTxtEncrypt);
+
+
+    //Decrypt
+    length = strlen(strEncrypted);
+    for(i = 0; i < length; i++){
+      ch = strEncrypted[i];
+        if(ch >= 'a' && ch <= 'z'){
+        ch = ch - CIPHER_KEY;
+        
+          if(ch < 'a'){
+          ch = ch + 'z' - 'a' + 1;
+          }
+
+      }
+      else if(ch >= 'A' && ch <= 'Z'){
+        ch = ch - CIPHER_KEY;
+        
+        if(ch < 'A'){
+          ch = ch + 'Z' - 'A' + 1;
+        }
+
+      }
+      strncat(strDecrypted, &ch , 1);
+    }
+    printf("\nDecrypted content: %s\n", strDecrypted);  
+    printf("Opening decrypted bin mode file %s to write decrypted content\n", "Lab5_DecryptedBin.txt");
+    fpBinDecrypt = fopen("Lab5_DecryptedBin.txt", "rb");
+    if(fpBinDecrypt == NULL) {         
+      printf("Error in creating file %s\n", "Lab5_DecryptedBin.txt");         
+      fclose(fpBinDecrypt);
+      exit(5);         
+    }
+    printf("Write different data types into bin mode data file, %s\n", "Lab5_BinData.bin");
+    //add ascii data: "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
+    ret = fputs(strDecrypted, fpBin);
+
+   //add float data
+   float f  = 1.234;
+   fwrite(&f, 1, sizeof(f), fpBin);
+
+   //add binary data: 0x00 to 0xFF
+   for (i = 0x00; i <=0xFF; i++) {         
+     ch = i;          
+     ret = fputc(ch, fpBin);     
+    }
+    printf("Closing bin mode data file, %s\n", "Lab5_BinData.bin");
+    fclose(fpBin); 
+
+
+
 }
