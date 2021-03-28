@@ -111,16 +111,23 @@ int main() {
       }
       strncat(strDecrypted, &ch , 1);
     }
+
     printf("\nDecrypted content: %s\n", strDecrypted);  
+
     printf("Opening decrypted bin mode file %s to write decrypted content\n", "Lab5_DecryptedBin.txt");
+    
     fpBinDecrypt = fopen("Lab5_DecryptedBin.txt", "wb");
+
     if(fpBinDecrypt == NULL) {         
       printf("Error in creating file %s\n", "Lab5_DecryptedBin.txt");         
       fclose(fpBinDecrypt);
       exit(5);         
     }
+
     printf("Write different data types into bin mode data file, %s\n", "Lab5_BinData.bin");
+    
     fpBin = fopen("Lab5_BinData.bin", "wb");
+
     if(fpBin == NULL) {         
       printf("Error in creating file %s\n", "Lab5_DecryptedBin.bin");         
       fclose(fpBin);
@@ -128,24 +135,20 @@ int main() {
     }
 
     //add ascii data: "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
-    for(i = 0; i < strlen(strDecrypted); i++){
-      strDecrypted[i] = (int)strDecrypted[i];
-    }
-
-
     ret = fputs(strDecrypted, fpBin);
 
-   //add float data
-   float f  = 1.234;
-   fwrite(&f, 1, sizeof(f), fpBin);
+    //add float data
+    float f = 1.234;
+    fwrite(&f, sizeof(f), 1, fpBin);
 
-   //add binary data: 0x00 to 0xFF
-   for (i = 0x00; i <=0xFF; i++) {         
-     ch = i;          
-     ret = fputc(ch, fpBin);     
+    //add binary data: 0x00 to 0xFF
+    for (i = 0x00; i <=0xFF; i++) {         
+        ch = i;          
+        ret = fputc(ch, fpBin);     
     }
     printf("Closing bin mode data file, %s\n", "Lab5_BinData.bin");
-    fclose(fpBin); 
+    fclose(fpBin);
+
     printf("\nOpening bin mode data file, %s\n", "Lab5_BinData.bin"); 
     fpBinData = fopen("Lab5_BinData.bin", "rb"); // binary mode
     if(fpBinData == NULL) {         
@@ -153,19 +156,24 @@ int main() {
       fclose(fpBinData);         
       exit(6);     
     }
+
     printf("\nRead string from bin mode file, %s: ", "Lab5_BinData.bin"); 
     if (fgets(strBin, 44, fpBinData) != NULL) {       
        printf("<%s>", strBin);   
     }
     printf("\n"); // newline
+
     printf("\nRead float from bin mode file, %s: ", "Lab5_BinData.bin");
-    fread(&fpBinData, 1, sizeof(floatBin), fpBinData);
+    //fseek(fpBinData, 1, SEEK_CUR);
+    fread(&floatBin, sizeof(int), 1, fpBinData);
     printf("<%f>", floatBin);  
     printf("\n"); // newline
+
     printf("\nRead binary data from bin mode file, %s: ", "Lab5_BinData.bin");
+
     if (fread(dataBin, sizeof(dataBin), 1, fpBinData) < 300 ) { 
       for (i=0; i < 256; i++) { 
-        if((I % 16) == 0)                 
+        if((i % 16) == 0)                 
           printf("\n"); // newline
         printf("[%02X]", dataBin[i]);             
       }
