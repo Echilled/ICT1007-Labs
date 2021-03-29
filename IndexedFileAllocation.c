@@ -30,9 +30,6 @@ int AllocateBlocks(struct file_table* newFile) {
 		}
 	}
 
-	printf("Initial Count %d\n", count);
-	printf("Size %d\n", Size);
-
 	//Not enough free blocks
 	if (count < Size) {
 		return 1;
@@ -74,12 +71,12 @@ int main()  {
     for(i = 0; i < numFiles; i++) {
 		printf("Enter the name of file #%d: ", i+1);
 		scanf("%s", fileTable[i].fileName);
-		printf("%s\n", fileTable[i].fileName);
+		
 		printf("Enter the size (kB) of file #%d: ", i+1);
 		scanf("%d", &fileSize);
 		fileTable[i].fileSize = fileSize;
         ret = AllocateBlocks(&fileTable[i]);
-		printf("Ret %d\n", ret);
+		
     }
 
 	printf("FILE_fileName\tFILE_SIZE\tBLOCKS_OCCUPIED\n");
