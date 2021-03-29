@@ -1,153 +1,126 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <time.h>
-#include <string.h>
+#define TOTAL_DISK_BLOCKS 32
+#define TOTAL_DISK_INODES 8
 
-#define TOTAL_BLOCKS 32
-#define NUMBER_OF_INODES 8
-#define INODE_ENTRY 1
-#define FILE_ENTRY 2
-#define SIZE_OF_ENTRY 1
-
-typedef struct FileTableEntry
-{
+struct file_table { 
     char fileName[20];
-    int startBlock;
     int fileSize;
-    int allocatedStatus;
-    int allocatedBlock;
-    struct FileTableEntry * next;
-} fileTableEntry;
+    struct block *sb;
+};
 
-void printStart()
-{
-    printf("File allocation method: SEQUENTIAL\n");
-    printf("Total blocks: %d\n", TOTAL_BLOCKS);
-    printf("File allocation starts at block: %d\n", NUMBER_OF_INODES);
-    printf("File allocation of end at block: %d\n", TOTAL_BLOCKS - 1);
-    printf("Size (kB) of each block: %d\n", SIZE_OF_ENTRY);
-}
+typedef struct block {
+    int blockNumber;
+    struct block *next;
+} Block;
 
-void printFileTable(fileTableEntry *fileTable)
-{
-    int i = NUMBER_OF_INODES;
-    fileTableEntry * current = NULL;
-    printf("FILE_NAME\tFILE_SIZE\tBLOCKS_OCCUPIED\n");
-    while (i < TOTAL_BLOCKS)
-    {
-        if (fileTable[i].allocatedStatus == FILE_ENTRY && fileTable[i].startBlock == i)
-        {
-            //print whole linked list
-            current = &fileTable[i];
-            printf("%s\t%2d\t\t", current->fileName, current->fileSize);
-            while (current)
-            {
-                if (current->next)
-                    printf("%d-", current->allocatedBlock);
-                else    
-                    printf("%d\n", current->allocatedBlock);
-                
-                current = current->next;
-            }   
-        }
-        
-        i++;
-        
-    }
-}
-bool checkIfAllocated(fileTableEntry *fileTable, int fileTableIndex)
-{
-    if (fileTableIndex > 32)
-        return false;
-    else if (fileTable[fileTableIndex].allocatedStatus == FILE_ENTRY)
-    {
-        printf("Filetable[%d].allocatedStatus = %d\n", fileTableIndex, fileTable[fileTableIndex].allocatedStatus);
-        return false;
-    }
-    return true;
-}
+Block * AllocateBlocks(int Size);
+Block * enqueue(Block * head, int val);
+void printList(Block * head);
 
-int main()
-{
-    int numberOfFilesToAllocate = 0, startingBlock = 0;
-    //init file table
-    srand(time(NULL)); // set srand
-    fileTableEntry fileTable[TOTAL_BLOCKS];
-    memset(&fileTable, 0, sizeof(fileTableEntry) * TOTAL_BLOCKS);
+int blockStatus[TOTAL_DISK_BLOCKS]; // free = 0
+int blockList[TOTAL_DISK_BLOCKS - TOTAL_DISK_INODES]; // list of blocks of a file
+struct file_table fileTable[TOTAL_DISK_BLOCKS - TOTAL_DISK_INODES];
 
-    for (int i = 0; i < 8; i++)
-    {
-        fileTable[i].allocatedStatus = INODE_ENTRY; //set these to INODE_ENTRY as the first 8 blocks are used for inodes
-    }
-    printStart();
-
-    printf("Enter no. of files to allocate: ");
-    scanf("%d", &numberOfFilesToAllocate);
-
-    for (int i = 0; i < numberOfFilesToAllocate; i++)
-    {
-        int currentFileNumber = i + 1, sizeOfFile = 0, currentBlock = 0, prevBlock = 0;
-        char fileName[20];
-        printf("Enter the name of file #%d: ", currentFileNumber);
-        scanf("%s", fileName);
-        printf("Enter the size (kB) of file #%d: ", currentFileNumber);
-        scanf("%d", &sizeOfFile);
-        fileTableEntry * newEntryHead = NULL;
-        startingBlock = (rand() % (TOTAL_BLOCKS - NUMBER_OF_INODES)) + (NUMBER_OF_INODES - 1);
-        currentBlock = startingBlock;
-        printf("Debug starting block generated: %d\n", startingBlock);
-        for (int j = 0; j < sizeOfFile; j++)
-        {
-            if (checkIfAllocated(fileTable, currentBlock))
-            {
-            //allocate
-                if (currentBlock == startingBlock) // first entry in new linked list
-                {
-                    fileTable[currentBlock].allocatedStatus = FILE_ENTRY;
-                    memcpy(fileTable[currentBlock].fileName, fileName, sizeof(char) * 20);
-                    fileTable[currentBlock].fileSize = sizeOfFile;
-                    fileTable[currentBlock].startBlock = startingBlock;
-                    fileTable[currentBlock].allocatedBlock = currentBlock;
-                
-                    
-                }
-                else if (j == sizeOfFile - 1)
-                {
-                    fileTable[currentBlock].allocatedStatus = FILE_ENTRY;
-                    memcpy(fileTable[currentBlock].fileName, fileName, sizeof(char) * 20);
-                    fileTable[currentBlock].fileSize = sizeOfFile;
-                    fileTable[currentBlock].startBlock = startingBlock;
-                    fileTable[prevBlock].next = &fileTable[currentBlock];
-                    fileTable[currentBlock].allocatedBlock = currentBlock;
-                    fileTable[currentBlock].next = NULL;
-                    
-                }
-                else
-                {
-                    fileTable[currentBlock].allocatedStatus = FILE_ENTRY;
-                    memcpy(fileTable[currentBlock].fileName, fileName, sizeof(char) * 20);
-                    fileTable[currentBlock].fileSize = sizeOfFile;
-                    fileTable[currentBlock].startBlock = startingBlock;
-                    fileTable[currentBlock].allocatedBlock = currentBlock;
-                    fileTable[prevBlock].next = &fileTable[currentBlock];
-                    
-                }
-                prevBlock = currentBlock;
-                currentBlock = (rand() % (TOTAL_BLOCKS - NUMBER_OF_INODES)) + (NUMBER_OF_INODES - 1);
-                printf("debug: end of code currentBlock value: %d\n", currentBlock);
-            }
-            else
-            {
-                printf("Unable to allocate file, not enough memory.\nSkipping. %s\n", fileName);
-
-                break;
-            }
-        }
-
-        
-    }
-
-    printFileTable(fileTable);
+int main() {
+    srand(time(NULL));
+    int i = 0, j = 0, numFiles = 0, nextBlock= 0;
+    Block *ret;
+    char s[20]; struct block *temp;
     
+    printf("Enter no of files: ");
+    scanf("%d", &numFiles);
+    for(i = 0; i < numFiles; i++) {
+        char file_name[20];
+        printf("\nEnter the name of the file #%d: ", i+1);
+        scanf("%s", file_name);
+        sprintf(fileTable[i].fileName, "%s", file_name);
+
+        printf("Enter the size (kB) of file #%d: ", i+1);
+        scanf("%d", &fileTable[i].fileSize);
+
+        ret = AllocateBlocks(fileTable[i].fileSize);
+
+        if(ret != NULL){
+            fileTable[i].sb = ret;
+        } else {
+            printf("Error trying to allocation file. Exiting.\n");
+            exit(0);
+        }
+    }
+
+    printf("\n%-20s%-20s%-20s\n", "FILE_fileName", "FILE_SIZE", "BLOCKS_OCCUPIED");
+    for(i = 0; i < numFiles; i++) {
+        printf("%-20s%-20d", fileTable[i].fileName, fileTable[i].fileSize);
+        printList(fileTable[i].sb);
+        printf("\n");
+    }
+
+    printf("File allocation completed. Exiting.\n");
+} 
+
+
+Block * AllocateBlocks(int Size) {
+    int i = 0, count = 0, inList = 0, nextBlock = 0;
+    int allocStartBlock = TOTAL_DISK_INODES;
+    int allocEndBlock = TOTAL_DISK_BLOCKS - 1;
+
+    // check whether sufficient free blocks are available
+    for (i = allocStartBlock; i < allocEndBlock+1; i++) 
+        if (blockStatus[i] == 0)
+            count++;
+    if (count < Size)
+        return NULL; // not enough free blocks
+
+    count = 0;
+    Block * head = NULL;
+    while(count < Size){
+        nextBlock = (rand() % (allocEndBlock - allocStartBlock + 1)) + allocStartBlock;
+        if(blockStatus[nextBlock] == 0){
+            head = enqueue(head, nextBlock);
+            blockStatus[nextBlock] = 1;
+            count += 1;
+        } 
+    }
+
+    if (count == Size)
+        return head; // success
+    else
+        return NULL; // not successful
+}
+
+
+Block * enqueue(Block * head, int val) {
+    if(head == NULL){
+        Block *ptr = (Block *) malloc(sizeof(Block));
+        ptr->blockNumber = val;
+        ptr->next = NULL;
+        head = ptr;
+    } else {
+        Block * current = head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+
+        /* now we can add a new variable */
+        current->next = (Block *) malloc(sizeof(Block));
+        current->next->blockNumber = val;
+        current->next->next = NULL;
+    }
+    return head;
+}
+
+
+void printList(Block * head) {
+    Block *ptr = head;
+
+    //start from the beginning
+    while(ptr != NULL) {
+        printf("%d", ptr->blockNumber);
+        if(ptr->next != NULL){
+            printf("-");
+        }
+        ptr = ptr->next;
+    }
 }
